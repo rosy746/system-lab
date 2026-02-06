@@ -1,0 +1,1993 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontrol Internet Lab - Enhanced</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 32px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .server-status {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .server-status.connected {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        }
+
+        .server-status.disconnected {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+        }
+
+        .status-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+            border-radius: 15px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 25px;
+            background: rgba(255,255,255,0.5);
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #333;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .tab:hover:not(.active) {
+            background: rgba(255,255,255,0.7);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .labs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .lab-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+        }
+
+        .lab-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .lab-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .lab-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .status-badge.online {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-badge.offline {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .status-badge.checking {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .status-badge.error {
+            background: #f5f5f5;
+            color: #757575;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-badge.online .status-dot {
+            background: #4caf50;
+        }
+
+        .status-badge.offline .status-dot {
+            background: #f44336;
+        }
+
+        .status-badge.checking .status-dot {
+            background: #ff9800;
+        }
+
+        .status-badge.error .status-dot {
+            background: #9e9e9e;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 18px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: inherit;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-on {
+            background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-on:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-off {
+            background: linear-gradient(135deg, #f44336 0%, #ef5350 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+        }
+
+        .btn-off:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+        }
+
+        .btn-devices {
+            background: linear-gradient(135deg, #2196f3 0%, #42a5f5 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+            grid-column: 1 / -1;
+        }
+
+        .btn-devices:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+        }
+
+        .lab-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .devices-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .devices-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .devices-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .devices-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            color: white;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .devices-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            overflow-x: auto;
+            display: block;
+        }
+
+        .devices-table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .devices-table th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #dee2e6;
+            white-space: nowrap;
+        }
+
+        .devices-table td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+            color: #666;
+        }
+
+        .devices-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .device-status-active {
+            color: #4caf50;
+            font-weight: 600;
+        }
+
+        .device-status-inactive {
+            color: #f44336;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-text {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            min-width: 300px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #333;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: white;
+            padding: 20px 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+            display: none;
+            align-items: center;
+            gap: 15px;
+            z-index: 10000;
+            min-width: 350px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .toast.active {
+            display: flex;
+        }
+
+        .toast.success {
+            border-left: 4px solid #4caf50;
+        }
+
+        .toast.error {
+            border-left: 4px solid #f44336;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast-icon {
+            font-size: 28px;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+
+        .toast-message {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .toast-close {
+            cursor: pointer;
+            font-size: 24px;
+            color: #999;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 20px;
+                margin-bottom: 20px;
+                padding: 0 5px;
+            }
+
+            .server-status {
+                padding: 15px;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+
+            .status-item {
+                min-width: calc(50% - 5px);
+                flex: 1 1 calc(50% - 5px);
+            }
+
+            .status-label {
+                font-size: 10px;
+            }
+
+            .status-value {
+                font-size: 16px;
+            }
+
+            .tabs {
+                padding: 8px;
+                gap: 6px;
+            }
+
+            .tab {
+                padding: 12px 10px;
+                font-size: 13px;
+            }
+
+            .labs-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .lab-card {
+                padding: 20px 15px;
+            }
+
+            .lab-name {
+                font-size: 18px;
+            }
+
+            .status-badge {
+                font-size: 11px;
+                padding: 6px 10px;
+            }
+
+            .button-group {
+                gap: 10px;
+            }
+
+            .btn {
+                padding: 14px 16px;
+                font-size: 14px;
+                gap: 8px;
+            }
+
+            .lab-info {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                padding: 12px;
+                font-size: 12px;
+            }
+
+            .devices-panel {
+                padding: 20px 12px;
+            }
+
+            .devices-title {
+                font-size: 20px;
+            }
+
+            .devices-header {
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
+            }
+
+            .devices-header .btn {
+                width: 100%;
+            }
+
+            .devices-stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .stat-card {
+                min-width: auto;
+                padding: 12px;
+            }
+
+            .stat-value {
+                font-size: 28px;
+            }
+
+            .stat-label {
+                font-size: 11px;
+            }
+
+            /* Device Cards - Mobile Optimized */
+            .device-card {
+                padding: 15px !important;
+            }
+
+            .device-card > div:first-child {
+                margin-bottom: 12px !important;
+            }
+
+            .device-card > div:first-child > div:first-child {
+                font-size: 28px !important;
+            }
+
+            /* Tables - Responsive */
+            .devices-table-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .devices-table {
+                font-size: 12px;
+                min-width: 600px;
+            }
+
+            .devices-table th,
+            .devices-table td {
+                padding: 8px 6px;
+            }
+
+            .devices-table th {
+                font-size: 11px;
+            }
+
+            .toast {
+                left: 10px;
+                right: 10px;
+                bottom: 10px;
+                min-width: auto;
+                padding: 15px;
+                flex-direction: row;
+                gap: 10px;
+            }
+
+            .toast-icon {
+                font-size: 24px;
+            }
+
+            .toast-title {
+                font-size: 14px;
+            }
+
+            .toast-message {
+                font-size: 12px;
+            }
+
+            .loading-content {
+                padding: 30px 20px;
+                min-width: 250px;
+            }
+
+            .spinner {
+                width: 50px;
+                height: 50px;
+            }
+
+            .loading-text {
+                font-size: 16px;
+            }
+
+            .empty-state {
+                padding: 40px 15px;
+            }
+
+            .empty-state-icon {
+                font-size: 48px;
+            }
+
+            .empty-state-text {
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 18px;
+                margin-bottom: 15px;
+            }
+
+            .server-status {
+                padding: 12px 10px;
+                gap: 8px;
+            }
+
+            .status-item {
+                min-width: calc(50% - 4px);
+            }
+
+            .status-value {
+                font-size: 14px;
+            }
+
+            .status-label {
+                font-size: 9px;
+            }
+
+            .tabs {
+                padding: 6px;
+                gap: 5px;
+            }
+
+            .tab {
+                padding: 10px 8px;
+                font-size: 12px;
+            }
+
+            .lab-card {
+                padding: 15px 12px;
+            }
+
+            .lab-name {
+                font-size: 17px;
+            }
+
+            .lab-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+
+            .status-badge {
+                align-self: flex-start;
+                font-size: 10px;
+                padding: 5px 10px;
+            }
+
+            .btn {
+                padding: 13px 14px;
+                font-size: 13px;
+                gap: 6px;
+            }
+
+            .btn span:first-child {
+                font-size: 16px;
+            }
+
+            .info-label {
+                font-size: 10px;
+            }
+
+            .lab-info > div > div:last-child {
+                font-size: 11px;
+            }
+
+            .devices-panel {
+                padding: 15px 10px;
+            }
+
+            .devices-title {
+                font-size: 18px;
+            }
+
+            .stat-card {
+                padding: 10px;
+            }
+
+            .stat-value {
+                font-size: 24px;
+            }
+
+            .stat-label {
+                font-size: 10px;
+            }
+
+            /* Device Cards - Extra Small Mobile */
+            .device-card {
+                padding: 12px !important;
+            }
+
+            .device-card > div:first-child > div:first-child {
+                font-size: 24px !important;
+            }
+
+            .device-card .status-badge {
+                font-size: 10px !important;
+                padding: 4px 8px !important;
+            }
+
+            /* Tables */
+            .devices-table {
+                font-size: 11px;
+            }
+
+            .devices-table th,
+            .devices-table td {
+                padding: 6px 4px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            h1 {
+                font-size: 16px;
+            }
+
+            .server-status {
+                padding: 10px 8px;
+            }
+
+            .status-item {
+                min-width: 100%;
+                flex: 1 1 100%;
+            }
+
+            .tab {
+                font-size: 11px;
+                padding: 8px 6px;
+            }
+
+            .lab-name {
+                font-size: 16px;
+            }
+
+            .btn {
+                font-size: 12px;
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 Kontrol Internet Lab - Enhanced Dashboard</h1>
+        
+        <!-- Server Status -->
+        <div class="server-status" id="serverStatus">
+            <div class="status-item">
+                <div class="status-label">Status Server</div>
+                <div class="status-value" id="serverStatusText">Checking...</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">MikroTik Host</div>
+                <div class="status-value" id="mikrotikHost">-</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">Total Labs</div>
+                <div class="status-value" id="totalLabs">-</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">Method</div>
+                <div class="status-value">NAT Control</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('control')">🎮 Control Panel</button>
+            <button class="tab" onclick="switchTab('devices')">📱 Devices Monitor</button>
+            <button class="tab" onclick="switchTab('nat')">🔧 NAT Rules</button>
+        </div>
+
+        <!-- Control Panel Tab -->
+        <div id="tab-control" class="tab-content active">
+            <div class="labs-grid">
+                <!-- Lab 7 -->
+                <div class="lab-card">
+                    <div class="lab-header">
+                        <div class="lab-name">🏫 Lab Komputer 7</div>
+                        <div class="status-badge checking" id="status-lab1">
+                            <span class="status-dot"></span>
+                            <span class="status-text">Checking...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button onclick="toggleInternet(1, 'on')" class="btn btn-on" id="btn-on-lab1">
+                            <span>🟢</span>
+                            <span>Hidupkan</span>
+                        </button>
+                        <button onclick="toggleInternet(1, 'off')" class="btn btn-off" id="btn-off-lab1">
+                            <span>🔴</span>
+                            <span>Matikan</span>
+                        </button>
+                        <button onclick="showDevices(1)" class="btn btn-devices" id="btn-devices-lab1">
+                            <span>📱</span>
+                            <span>Lihat Devices (<span id="device-count-lab1">0</span>)</span>
+                        </button>
+                    </div>
+                    
+                    <div class="lab-info">
+                        <div class="info-item">
+                            <div class="info-label">Network</div>
+                            <div id="network-lab1">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Interface</div>
+                            <div id="interface-lab1">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">NAT Comment</div>
+                            <div id="nat-comment-lab1">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Last Update</div>
+                            <div id="last-update-lab1">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lab 8 -->
+                <div class="lab-card">
+                    <div class="lab-header">
+                        <div class="lab-name">🏫 Lab Komputer 8</div>
+                        <div class="status-badge checking" id="status-lab2">
+                            <span class="status-dot"></span>
+                            <span class="status-text">Checking...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button onclick="toggleInternet(2, 'on')" class="btn btn-on" id="btn-on-lab2">
+                            <span>🟢</span>
+                            <span>Hidupkan</span>
+                        </button>
+                        <button onclick="toggleInternet(2, 'off')" class="btn btn-off" id="btn-off-lab2">
+                            <span>🔴</span>
+                            <span>Matikan</span>
+                        </button>
+                        <button onclick="showDevices(2)" class="btn btn-devices" id="btn-devices-lab2">
+                            <span>📱</span>
+                            <span>Lihat Devices (<span id="device-count-lab2">0</span>)</span>
+                        </button>
+                    </div>
+                    
+                    <div class="lab-info">
+                        <div class="info-item">
+                            <div class="info-label">Network</div>
+                            <div id="network-lab2">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Interface</div>
+                            <div id="interface-lab2">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">NAT Comment</div>
+                            <div id="nat-comment-lab2">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Last Update</div>
+                            <div id="last-update-lab2">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Devices Monitor Tab -->
+        <div id="tab-devices" class="tab-content">
+            <div class="devices-panel">
+                <div class="devices-header">
+                    <div class="devices-title">📱 Connected Devices</div>
+                    <button class="btn btn-devices" onclick="refreshAllDevices()">🔄 Refresh All</button>
+                </div>
+
+                <div class="devices-stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-devices-all">0</div>
+                        <div class="stat-label">Total Devices</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-active-all">0</div>
+                        <div class="stat-label">Active Devices</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-labs-count">0</div>
+                        <div class="stat-label">Labs Monitored</div>
+                    </div>
+                </div>
+
+                <div id="devices-list">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- NAT Rules Tab -->
+        <div id="tab-nat" class="tab-content">
+            <div class="devices-panel">
+                <div class="devices-header">
+                    <div class="devices-title">🔧 NAT Rules Status</div>
+                    <button class="btn btn-devices" onclick="loadNATRules()">🔄 Refresh</button>
+                </div>
+
+                <div id="nat-rules-list">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <div class="loading-text" id="loadingText">Mengirim perintah...</div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span class="toast-icon" id="toastIcon">✅</span>
+        <div class="toast-content">
+            <div class="toast-title" id="toastTitle">Berhasil</div>
+            <div class="toast-message" id="toastMessage">Pesan</div>
+        </div>
+        <span class="toast-close" onclick="hideToast()">×</span>
+    </div>
+
+    <script>
+        // ==========================================
+        // CONFIGURATION
+        // ==========================================
+        const CONFIG = {
+            PYTHON_SERVER_URL: '/api',
+            CHECK_INTERVAL: 30000,
+            REQUEST_TIMEOUT: 10000,
+            MAX_RETRIES: 3
+        };
+
+        // ==========================================
+        // STATE
+        // ==========================================
+        const AppState = {
+            isServerConnected: false,
+            retryCount: 0,
+            labsData: {},
+            currentTab: 'control',
+            currentLabDevices: null, // Track which lab details are being viewed
+            autoRefreshInterval: null
+        };
+
+        // ==========================================
+        // UTILITY FUNCTIONS
+        // ==========================================
+        
+        function safeGetElement(id) {
+            const el = document.getElementById(id);
+            if (!el) console.warn(`Element not found: ${id}`);
+            return el;
+        }
+
+        async function fetchWithTimeout(url, options = {}, timeout = CONFIG.REQUEST_TIMEOUT) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
+            
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                return response;
+            } catch (error) {
+                clearTimeout(timeoutId);
+                if (error.name === 'AbortError') {
+                    throw new Error('Request timeout');
+                }
+                throw error;
+            }
+        }
+
+        function updateServerConnection(isConnected) {
+            AppState.isServerConnected = isConnected;
+            const statusEl = safeGetElement('serverStatus');
+            const textEl = safeGetElement('serverStatusText');
+            
+            if (!statusEl || !textEl) return;
+            
+            if (isConnected) {
+                statusEl.className = 'server-status connected';
+                textEl.textContent = '✅ Connected';
+            } else {
+                statusEl.className = 'server-status disconnected';
+                textEl.textContent = '❌ Disconnected';
+            }
+        }
+
+        function showToast(title, message, type = 'success') {
+            const toast = safeGetElement('toast');
+            const icon = safeGetElement('toastIcon');
+            const titleEl = safeGetElement('toastTitle');
+            const msgEl = safeGetElement('toastMessage');
+
+            if (!toast || !icon || !titleEl || !msgEl) return;
+
+            const config = {
+                success: { icon: '✅' },
+                error: { icon: '❌' }
+            };
+
+            icon.textContent = config[type]?.icon || '✅';
+            titleEl.textContent = title;
+            msgEl.textContent = message;
+            
+            toast.className = `toast active ${type}`;
+            setTimeout(() => hideToast(), 5000);
+        }
+
+        function hideToast() {
+            const toast = safeGetElement('toast');
+            if (toast) toast.classList.remove('active');
+        }
+
+        function showLoading(message = 'Mengirim perintah...') {
+            const overlay = safeGetElement('loadingOverlay');
+            const text = safeGetElement('loadingText');
+            
+            if (overlay) overlay.classList.add('active');
+            if (text) text.textContent = message;
+        }
+
+        function hideLoading() {
+            const overlay = safeGetElement('loadingOverlay');
+            if (overlay) overlay.classList.remove('active');
+        }
+
+        function updateStatus(labId, status) {
+            const statusEl = safeGetElement(`status-lab${labId}`);
+            const lastUpdateEl = safeGetElement(`last-update-lab${labId}`);
+            
+            if (!statusEl) return;
+            
+            const textEl = statusEl.querySelector('.status-text');
+            if (!textEl) return;
+            
+            statusEl.className = `status-badge ${status}`;
+            
+            const statusText = {
+                online: 'Online',
+                offline: 'Offline',
+                checking: 'Checking...',
+                error: 'Error'
+            };
+            
+            textEl.textContent = statusText[status] || 'Unknown';
+            
+            if (lastUpdateEl) {
+                const now = new Date();
+                lastUpdateEl.textContent = now.toLocaleTimeString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            }
+        }
+
+        function setButtonsEnabled(labId, enabled) {
+            const btnOn = safeGetElement(`btn-on-lab${labId}`);
+            const btnOff = safeGetElement(`btn-off-lab${labId}`);
+            const btnDevices = safeGetElement(`btn-devices-lab${labId}`);
+            
+            if (btnOn) btnOn.disabled = !enabled;
+            if (btnOff) btnOff.disabled = !enabled;
+            if (btnDevices) btnDevices.disabled = !enabled;
+        }
+
+        function switchTab(tabName) {
+            AppState.currentTab = tabName;
+            AppState.currentLabDevices = null; // Reset when switching tabs
+            
+            // Update tab buttons - method yang lebih sederhana
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach((tab, index) => {
+                tab.classList.remove('active');
+                if ((index === 0 && tabName === 'control') ||
+                    (index === 1 && tabName === 'devices') ||
+                    (index === 2 && tabName === 'nat')) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            const tabContent = safeGetElement(`tab-${tabName}`);
+            if (tabContent) {
+                tabContent.classList.add('active');
+            }
+            
+            // Load data for specific tabs
+            if (tabName === 'devices') {
+                refreshAllDevices();
+            } else if (tabName === 'nat') {
+                loadNATRules();
+            }
+            
+            console.log(`📑 Switched to tab: ${tabName}`);
+        }
+
+        // ==========================================
+        // API FUNCTIONS
+        // ==========================================
+
+        async function testConnection() {
+            try {
+                console.log('🔍 Testing connection...');
+                
+                const response = await fetchWithTimeout(
+                    `${CONFIG.PYTHON_SERVER_URL}/status`,
+                    { method: 'GET' },
+                    5000
+                );
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('✅ Connected');
+                    updateServerConnection(true);
+                    AppState.retryCount = 0;
+                    
+                    // Update server info
+                    if (data.mikrotik_host) {
+                        const hostEl = safeGetElement('mikrotikHost');
+                        if (hostEl) hostEl.textContent = data.mikrotik_host;
+                    }
+                    if (data.labs) {
+                        const labsEl = safeGetElement('totalLabs');
+                        if (labsEl) labsEl.textContent = data.labs;
+                    }
+                    
+                    return true;
+                }
+                
+                console.error('❌ Server error:', response.status);
+                updateServerConnection(false);
+                return false;
+            } catch (error) {
+                console.error('❌ Connection error:', error.message);
+                updateServerConnection(false);
+                return false;
+            }
+        }
+
+        async function loadLabsData() {
+            try {
+                const response = await fetchWithTimeout(`${CONFIG.PYTHON_SERVER_URL}/labs`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.labs) {
+                        data.labs.forEach(lab => {
+                            AppState.labsData[lab.id] = lab;
+                            
+                            // Update lab info in UI
+                            const networkEl = safeGetElement(`network-lab${lab.id}`);
+                            const interfaceEl = safeGetElement(`interface-lab${lab.id}`);
+                            const natCommentEl = safeGetElement(`nat-comment-lab${lab.id}`);
+                            
+                            if (networkEl) networkEl.textContent = lab.network;
+                            if (interfaceEl) interfaceEl.textContent = lab.interface;
+                            if (natCommentEl) natCommentEl.textContent = lab.nat_comment;
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading labs data:', error);
+            }
+        }
+
+        async function checkStatus(labId) {
+            if (!AppState.isServerConnected) {
+                updateStatus(labId, 'error');
+                return;
+            }
+
+            try {
+                const response = await fetchWithTimeout(
+                    `${CONFIG.PYTHON_SERVER_URL}/lab/status/${labId}`,
+                    { method: 'GET' }
+                );
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.status) {
+                        updateStatus(labId, data.status);
+                    } else {
+                        updateStatus(labId, 'error');
+                    }
+                } else {
+                    updateStatus(labId, 'error');
+                }
+            } catch (error) {
+                console.error(`Error checking lab ${labId}:`, error);
+                updateStatus(labId, 'error');
+            }
+        }
+
+        async function toggleInternet(labId, action) {
+            const labName = labId === 1 ? 'Lab 7' : 'Lab 8';
+            const actionText = action === 'on' ? 'menghidupkan' : 'mematikan';
+
+            if (!AppState.isServerConnected) {
+                showToast('Server Tidak Tersedia', 'Tidak dapat terhubung ke server kontrol', 'error');
+                return;
+            }
+
+            if (!confirm(`Apakah Anda yakin ingin ${actionText} internet di ${labName}?`)) {
+                return;
+            }
+
+            showLoading(`${actionText.charAt(0).toUpperCase() + actionText.slice(1)} internet...`);
+            setButtonsEnabled(labId, false);
+
+            try {
+                const response = await fetchWithTimeout(
+                    `${CONFIG.PYTHON_SERVER_URL}/lab/internet`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            lab_id: labId,
+                            action: action
+                        })
+                    }
+                );
+
+                hideLoading();
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast('Berhasil', `Internet berhasil di-${action} untuk ${labName}`, 'success');
+                    updateStatus(labId, action === 'on' ? 'online' : 'offline');
+                } else {
+                    throw new Error(data.message || 'Unknown error');
+                }
+            } catch (error) {
+                hideLoading();
+                console.error('Toggle error:', error);
+                showToast('Gagal', `Gagal ${actionText} internet: ${error.message}`, 'error');
+            } finally {
+                setButtonsEnabled(labId, true);
+            }
+        }
+
+        async function loadDevicesForLab(labId) {
+            try {
+                const response = await fetchWithTimeout(
+                    `${CONFIG.PYTHON_SERVER_URL}/lab/devices/${labId}`
+                );
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        const countEl = safeGetElement(`device-count-lab${labId}`);
+                        if (countEl) {
+                            countEl.textContent = data.active_devices || 0;
+                        }
+                        return data;
+                    }
+                }
+                return null;
+            } catch (error) {
+                console.error(`Error loading devices for lab ${labId}:`, error);
+                return null;
+            }
+        }
+
+        async function showDevices(labId) {
+            console.log('🔍 showDevices called for lab:', labId);
+            showLoading('Memuat data devices...');
+            
+            try {
+                const data = await loadDevicesForLab(labId);
+                console.log('📊 Device data received:', data);
+                hideLoading();
+                
+                if (!data || !data.success) {
+                    showToast('Error', 'Gagal memuat data devices', 'error');
+                    return;
+                }
+
+                // Track that we're viewing this lab's devices
+                AppState.currentLabDevices = labId;
+
+                const labName = data.lab_name || `Lab ${labId}`;
+                const devices = data.devices || [];
+                
+                console.log(`✅ Found ${devices.length} devices for ${labName}`);
+                
+                // Get current time for "Last updated"
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                
+                let html = `
+                    <div style="margin-top: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; color: white;">
+                            <div>
+                                <h3 style="margin: 0 0 5px 0; font-size: 24px;">📱 ${labName}</h3>
+                                <div style="font-size: 14px; opacity: 0.9;">Network: ${data.network || 'N/A'}</div>
+                                <div style="font-size: 12px; opacity: 0.8; margin-top: 5px;">
+                                    🔄 Last updated: ${timeString} • Auto-refresh: ON
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 32px; font-weight: 700;">${data.active_devices}/${data.total_devices}</div>
+                                <div style="font-size: 12px; opacity: 0.9;">Active Devices</div>
+                            </div>
+                        </div>
+                `;
+
+                if (devices.length === 0) {
+                    html += `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <div class="empty-state-text">Tidak ada devices terdeteksi</div>
+                            <div style="margin-top: 10px; color: #999; font-size: 14px;">
+                                Pastikan ada komputer yang terhubung ke network ${data.network || 'lab ini'}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Create device cards grid
+                    html += `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">`;
+
+                    devices.forEach((device, index) => {
+                        const statusClass = device.active ? 'device-status-active' : 'device-status-inactive';
+                        const statusBg = device.active ? '#e8f5e9' : '#ffebee';
+                        const statusColor = device.active ? '#2e7d32' : '#c62828';
+                        const statusIcon = device.active ? '🟢' : '🔴';
+                        const statusText = device.active ? 'Online' : 'Offline';
+                        
+                        // Determine device icon based on hostname or other info
+                        let deviceIcon = '💻';
+                        const hostname = (device.hostname || 'unknown').toLowerCase();
+                        if (hostname.includes('phone') || hostname.includes('android') || hostname.includes('iphone')) {
+                            deviceIcon = '📱';
+                        } else if (hostname.includes('laptop')) {
+                            deviceIcon = '💻';
+                        } else if (hostname.includes('pc') || hostname.includes('desktop')) {
+                            deviceIcon = '🖥️';
+                        } else if (hostname.includes('tablet') || hostname.includes('ipad')) {
+                            deviceIcon = '📱';
+                        }
+
+                        html += `
+                            <div style="background: white; border-radius: 12px; padding: 20px; border: 2px solid ${device.active ? '#4caf50' : '#e0e0e0'}; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                                    <div style="font-size: 32px;">${deviceIcon}</div>
+                                    <div style="background: ${statusBg}; color: ${statusColor}; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 5px;">
+                                        <span>${statusIcon}</span>
+                                        <span>${statusText}</span>
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-bottom: 15px;">
+                                    <div style="font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600; margin-bottom: 3px;">Hostname</div>
+                                    <div style="font-size: 16px; font-weight: 700; color: #333; word-break: break-word;">
+                                        ${device.hostname || 'Unknown Device'}
+                                    </div>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding-top: 15px; border-top: 1px solid #f0f0f0;">
+                                    <div>
+                                        <div style="font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600; margin-bottom: 3px;">IP Address</div>
+                                        <div style="font-size: 13px; font-weight: 600; color: #667eea; font-family: 'Courier New', monospace;">
+                                            ${device.ip}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600; margin-bottom: 3px;">Source</div>
+                                        <div style="font-size: 13px; font-weight: 600; color: #333;">
+                                            ${device.source || 'N/A'}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #f0f0f0;">
+                                    <div style="font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600; margin-bottom: 3px;">MAC Address</div>
+                                    <div style="font-size: 12px; font-family: 'Courier New', monospace; color: #666; word-break: break-all;">
+                                        ${device.mac || 'N/A'}
+                                    </div>
+                                </div>
+
+                                ${device.last_seen ? `
+                                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #f0f0f0;">
+                                        <div style="font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600; margin-bottom: 3px;">Last Seen</div>
+                                        <div style="font-size: 12px; color: #666;">
+                                            ${device.last_seen}
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    });
+
+                    html += `</div>`; // Close grid
+                }
+
+                html += `</div>`;
+
+                console.log('🔄 Switching to devices tab...');
+                // Switch to devices tab first
+                const tabs = document.querySelectorAll('.tab');
+                tabs.forEach((tab, index) => {
+                    tab.classList.remove('active');
+                    if (index === 1) { // Devices tab is index 1
+                        tab.classList.add('active');
+                    }
+                });
+                
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                const devicesTab = safeGetElement('tab-devices');
+                if (devicesTab) {
+                    devicesTab.classList.add('active');
+                    AppState.currentTab = 'devices';
+                    console.log('✅ Devices tab activated');
+                }
+                
+                // Update content
+                const devicesList = safeGetElement('devices-list');
+                if (devicesList) {
+                    devicesList.innerHTML = html;
+                    console.log('✅ Devices list updated');
+                } else {
+                    console.error('❌ devices-list element not found');
+                }
+
+            } catch (error) {
+                hideLoading();
+                console.error('❌ Error showing devices:', error);
+                showToast('Error', 'Terjadi kesalahan saat memuat devices', 'error');
+            }
+        }
+
+        async function refreshAllDevices() {
+            showLoading('Memuat semua devices...');
+            
+            try {
+                const response = await fetchWithTimeout(
+                    `${CONFIG.PYTHON_SERVER_URL}/devices/summary`
+                );
+
+                hideLoading();
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch devices summary');
+                }
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Unknown error');
+                }
+
+                // Update stats
+                const totalDevicesEl = safeGetElement('total-devices-all');
+                const totalActiveEl = safeGetElement('total-active-all');
+                const totalLabsEl = safeGetElement('total-labs-count');
+
+                if (totalDevicesEl) totalDevicesEl.textContent = data.total_devices || 0;
+                if (totalActiveEl) totalActiveEl.textContent = data.total_active || 0;
+                if (totalLabsEl) totalLabsEl.textContent = data.total_labs || 0;
+
+                // Update individual lab device counts
+                if (data.labs) {
+                    data.labs.forEach(lab => {
+                        const countEl = safeGetElement(`device-count-lab${lab.lab_id}`);
+                        if (countEl) {
+                            countEl.textContent = lab.active_devices || 0;
+                        }
+                    });
+                }
+
+                // Build devices list HTML - Card-based layout
+                let html = '';
+
+                if (data.labs && data.labs.length > 0) {
+                    html += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; margin-top: 20px;">`;
+                    
+                    data.labs.forEach(lab => {
+                        const activePercent = lab.total_devices > 0 ? Math.round((lab.active_devices / lab.total_devices) * 100) : 0;
+                        const statusColor = lab.status === 'ok' ? '#4caf50' : '#f44336';
+                        
+                        html += `
+                            <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-left: 5px solid ${statusColor}; transition: transform 0.3s; cursor: pointer;" onclick="showDevices(${lab.lab_id})">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px;">
+                                    <div>
+                                        <div style="font-size: 20px; font-weight: 700; color: #333; margin-bottom: 5px;">
+                                            🏫 ${lab.lab_name}
+                                        </div>
+                                        <div style="font-size: 12px; color: #999; font-family: 'Courier New', monospace;">
+                                            ${lab.network}
+                                        </div>
+                                    </div>
+                                    <div style="background: ${lab.status === 'ok' ? '#e8f5e9' : '#ffebee'}; color: ${statusColor}; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700;">
+                                        ${lab.status === 'ok' ? '✅ OK' : '❌ ERROR'}
+                                    </div>
+                                </div>
+
+                                <div style="margin-bottom: 15px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                        <span style="font-size: 13px; color: #666;">Devices Active</span>
+                                        <span style="font-size: 18px; font-weight: 700; color: #333;">${lab.active_devices}/${lab.total_devices}</span>
+                                    </div>
+                                    
+                                    <div style="width: 100%; height: 8px; background: #e0e0e0; border-radius: 10px; overflow: hidden;">
+                                        <div style="width: ${activePercent}%; height: 100%; background: linear-gradient(90deg, #4caf50 0%, #66bb6a 100%); transition: width 0.5s;"></div>
+                                    </div>
+                                    
+                                    <div style="text-align: right; margin-top: 5px; font-size: 12px; color: #999;">
+                                        ${activePercent}% Online
+                                    </div>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-top: 15px; border-top: 1px solid #f0f0f0;">
+                                    <div>
+                                        <div style="font-size: 11px; color: #999; margin-bottom: 3px;">Total Devices</div>
+                                        <div style="font-size: 24px; font-weight: 700; color: #2196f3;">${lab.total_devices}</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 11px; color: #999; margin-bottom: 3px;">Active Now</div>
+                                        <div style="font-size: 24px; font-weight: 700; color: #4caf50;">${lab.active_devices}</div>
+                                    </div>
+                                </div>
+
+                                <div style="margin-top: 15px; text-align: center; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                                    <div style="font-size: 12px; color: #667eea; font-weight: 600;">
+                                        👆 Click to view detailed devices
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    html += `</div>`;
+                } else {
+                    html = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <div class="empty-state-text">Tidak ada data devices</div>
+                        </div>
+                    `;
+                }
+
+                const devicesList = safeGetElement('devices-list');
+                if (devicesList) {
+                    devicesList.innerHTML = html;
+                }
+
+                showToast('Success', 'Devices summary berhasil dimuat', 'success');
+
+            } catch (error) {
+                hideLoading();
+                console.error('Error refreshing devices:', error);
+                showToast('Error', `Gagal memuat devices: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadNATRules() {
+            showLoading('Memuat NAT rules...');
+            
+            try {
+                const response = await fetchWithTimeout(
+                    `${CONFIG.PYTHON_SERVER_URL}/nat/rules`
+                );
+
+                hideLoading();
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch NAT rules');
+                }
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Unknown error');
+                }
+
+                let html = '';
+
+                if (data.rules && data.rules.length > 0) {
+                    html += `
+                        <table class="devices-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Comment</th>
+                                    <th>Chain</th>
+                                    <th>Action</th>
+                                    <th>Source Address</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    data.rules.forEach(rule => {
+                        const statusClass = rule.status === 'ENABLED' ? 'device-status-active' : 'device-status-inactive';
+                        const statusIcon = rule.status === 'ENABLED' ? '✅' : '🔴';
+                        
+                        html += `
+                            <tr>
+                                <td><code>${rule.id || 'N/A'}</code></td>
+                                <td><strong>${rule.comment || 'N/A'}</strong></td>
+                                <td>${rule.chain || 'N/A'}</td>
+                                <td>${rule.action || 'N/A'}</td>
+                                <td><code>${rule['src-address'] || 'N/A'}</code></td>
+                                <td class="${statusClass}">${statusIcon} ${rule.status}</td>
+                            </tr>
+                        `;
+                    });
+
+                    html += `
+                            </tbody>
+                        </table>
+                        <div style="margin-top: 20px; text-align: center; color: #666;">
+                            Total NAT Rules: <strong>${data.total}</strong>
+                        </div>
+                    `;
+                } else {
+                    html = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <div class="empty-state-text">Tidak ada NAT rules ditemukan</div>
+                        </div>
+                    `;
+                }
+
+                const natRulesList = safeGetElement('nat-rules-list');
+                if (natRulesList) {
+                    natRulesList.innerHTML = html;
+                }
+
+                showToast('Success', 'NAT rules berhasil dimuat', 'success');
+
+            } catch (error) {
+                hideLoading();
+                console.error('Error loading NAT rules:', error);
+                showToast('Error', `Gagal memuat NAT rules: ${error.message}`, 'error');
+            }
+        }
+
+        // ==========================================
+        // AUTO-REFRESH LOGIC
+        // ==========================================
+
+        async function autoRefreshCurrentView() {
+            if (!AppState.isServerConnected) {
+                console.log('⏸️ Auto-refresh paused: server disconnected');
+                return;
+            }
+
+            console.log(`🔄 Auto-refreshing... Tab: ${AppState.currentTab}, Lab: ${AppState.currentLabDevices}`);
+
+            // Refresh based on current view
+            if (AppState.currentTab === 'devices') {
+                if (AppState.currentLabDevices !== null) {
+                    // Refreshing specific lab devices detail
+                    console.log(`📱 Auto-refreshing Lab ${AppState.currentLabDevices} devices...`);
+                    const data = await loadDevicesForLab(AppState.currentLabDevices);
+                    if (data && data.success) {
+                        // Silently update the view without loading overlay
+                        const devices = data.devices || [];
+                        const now = new Date();
+                        const timeString = now.toLocaleTimeString('id-ID', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit'
+                        });
+
+                        let html = `
+                            <div style="margin-top: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; color: white;">
+                                    <div>
+                                        <h3 style="margin: 0 0 5px 0; font-size: 24px;">📱 ${data.lab_name || `Lab ${AppState.currentLabDevices}`}</h3>
+                                        <div style="font-size: 14px; opacity: 0.9;">Network: ${data.network || 'N/A'}</div>
+                                        <div style="font-size: 12px; opacity: 0.8; margin-top: 5px;">
+                                            🔄 Last updated: ${timeString} • Auto-refresh: ON
+                                        </div>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="font-size: 32px; font-weight: 700;">${data.active_devices}/${data.total_devices}</div>
+                                        <div style="font-size: 12px; opacity: 0.9;">Active Devices</div>
+                                    </div>
+                                </div>
+                        `;
+
+                        if (devices.length === 0) {
+                            html += `
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">📭</div>
+                                    <div class="empty-state-text">Tidak ada devices terdeteksi</div>
+                                    <div style="margin-top: 10px; color: #999; font-size: 14px;">
+                                        Pastikan ada komputer yang terhubung ke network ${data.network || 'lab ini'}
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            html += `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">`;
+
+                            devices.forEach((device) => {
+                                const statusBg = device.active ? '#e8f5e9' : '#ffebee';
+                                const statusColor = device.active ? '#2e7d32' : '#c62828';
+                                const statusIcon = device.active ? '🟢' : '🔴';
+                                const statusText = device.active ? 'Online' : 'Offline';
+                                
+                                let deviceIcon = '💻';
+                                const hostname = (device.hostname || 'unknown').toLowerCase();
+                                if (hostname.includes('phone') || hostname.includes('android') || hostname.includes('iphone')) {
+                                    deviceIcon = '📱';
+                                } else if (hostname.includes('laptop')) {
+                                    deviceIcon = '💻';
+                                } else if (hostname.includes('pc') || hostname.includes('desktop')) {
+                                    deviceIcon = '🖥️';
+                                } else if (hostname.includes('tablet') || hostname.includes('ipad')) {
+                                    deviceIcon = '📱';
+                                }
+
+                                html += `
+                                    <div style="background: white; border-radius: 12px; padding: 20px; border: 2px solid ${device.active ? '#4caf50' : '#e0e0e0'}; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                                            <div style="font-size: 32px;">${deviceIcon}</div>
+                                            <div style="background: ${statusBg}; color: ${statusColor}; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 5px;">
+                                                <span>${statusIcon}</span>
+                                                <span>${statusText}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="margin-bottom: 15px;">
+                                            <div style="font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600; margin-bottom: 3px;">Hostname</div>
+                                            <div style="font-size: 16px; font-weight: 700; color: #333; word-break: break-word;">
+                                                ${device.hostname || 'Unknown Device'}
+                                            </div>
+                                        </div>
+
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding-top: 15px; border-top: 1px solid #f0f0f0;">
+                                            <div>
+                                                <div style="font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600; margin-bottom: 3px;">IP Address</div>
+                                                <div style="font-size: 13px; font-weight: 600; color: #667eea; font-family: 'Courier New', monospace;">
+                                                    ${device.ip}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div style="font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600; margin-bottom: 3px;">Source</div>
+                                                <div style="font-size: 13px; font-weight: 600; color: #333;">
+                                                    ${device.source || 'N/A'}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #f0f0f0;">
+                                            <div style="font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600; margin-bottom: 3px;">MAC Address</div>
+                                            <div style="font-size: 12px; font-family: 'Courier New', monospace; color: #666; word-break: break-all;">
+                                                ${device.mac || 'N/A'}
+                                            </div>
+                                        </div>
+
+                                        ${device.last_seen ? `
+                                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #f0f0f0;">
+                                                <div style="font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600; margin-bottom: 3px;">Last Seen</div>
+                                                <div style="font-size: 12px; color: #666;">
+                                                    ${device.last_seen}
+                                                </div>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                `;
+                            });
+
+                            html += `</div>`;
+                        }
+
+                        html += `</div>`;
+
+                        const devicesList = safeGetElement('devices-list');
+                        if (devicesList) {
+                            devicesList.innerHTML = html;
+                            console.log('✅ Lab devices auto-refreshed');
+                        }
+                    }
+                } else {
+                    // Refreshing devices summary
+                    console.log('📊 Auto-refreshing devices summary...');
+                    await refreshAllDevices();
+                }
+            } else if (AppState.currentTab === 'nat') {
+                // Auto-refresh NAT rules
+                console.log('🔧 Auto-refreshing NAT rules...');
+                await loadNATRules();
+            }
+        }
+
+        // ==========================================
+        // INITIALIZATION
+        // ==========================================
+
+        async function init() {
+            console.log('🎯 Initializing Enhanced Dashboard...');
+            
+            const connected = await testConnection();
+            
+            if (connected) {
+                await loadLabsData();
+                await checkStatus(1);
+                await checkStatus(2);
+                await loadDevicesForLab(1);
+                await loadDevicesForLab(2);
+                
+                // Setup auto-refresh for status and device counts (always runs)
+                setInterval(async () => {
+                    if (AppState.isServerConnected) {
+                        await checkStatus(1);
+                        await checkStatus(2);
+                        await loadDevicesForLab(1);
+                        await loadDevicesForLab(2);
+                        console.log('✅ Status & counts auto-refreshed');
+                    }
+                }, CONFIG.CHECK_INTERVAL);
+
+                // Setup auto-refresh for active tab content
+                setInterval(async () => {
+                    await autoRefreshCurrentView();
+                }, CONFIG.CHECK_INTERVAL);
+                
+                showToast('Dashboard Siap', 'Sistem berhasil terhubung • Auto-refresh: ON', 'success');
+            } else {
+                setButtonsEnabled(1, false);
+                setButtonsEnabled(2, false);
+                updateStatus(1, 'error');
+                updateStatus(2, 'error');
+                
+                if (AppState.retryCount < CONFIG.MAX_RETRIES) {
+                    AppState.retryCount++;
+                    setTimeout(testConnection, 5000);
+                }
+            }
+        }
+
+        // ==========================================
+        // EVENT LISTENERS
+        // ==========================================
+
+        document.addEventListener('DOMContentLoaded', init);
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && AppState.isServerConnected) {
+                checkStatus(1);
+                checkStatus(2);
+                loadDevicesForLab(1);
+                loadDevicesForLab(2);
+            }
+        });
+
+        window.addEventListener('online', testConnection);
+        window.addEventListener('offline', () => updateServerConnection(false));
+    </script>
+</body>
+</html>
