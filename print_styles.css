@@ -1,0 +1,309 @@
+/**
+ * Print Styles untuk Reports
+ * Digunakan saat user klik tombol Print atau Ctrl+P
+ */
+
+@media print {
+    /* Hide elements not needed in print */
+    .topbar,
+    .filter-panel,
+    .filter-actions,
+    .btn,
+    .back-btn,
+    .card-arrow,
+    nav,
+    footer {
+        display: none !important;
+    }
+
+    /* Page setup */
+    @page {
+        size: A4 landscape;
+        margin: 1.5cm;
+    }
+
+    body {
+        background: white !important;
+        color: black !important;
+        font-size: 11pt;
+        line-height: 1.4;
+    }
+
+    /* Main container */
+    .main {
+        max-width: 100%;
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Page header */
+    .page-header {
+        background: white !important;
+        color: black !important;
+        border: 2px solid #333;
+        border-radius: 0;
+        padding: 15px;
+        margin-bottom: 20px;
+        page-break-after: avoid;
+    }
+
+    .page-header h2 {
+        color: black !important;
+        font-size: 18pt;
+        margin-bottom: 8px;
+    }
+
+    .page-header p {
+        color: #333 !important;
+        font-size: 10pt;
+    }
+
+    /* Stats cards - adjust layout for print */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-bottom: 20px;
+        page-break-inside: avoid;
+    }
+
+    .stat-card {
+        background: white !important;
+        border: 1px solid #ddd !important;
+        border-radius: 4px;
+        padding: 10px;
+        page-break-inside: avoid;
+    }
+
+    .stat-icon {
+        background: #f0f0f0 !important;
+        width: 35px;
+        height: 35px;
+        font-size: 14pt;
+    }
+
+    .stat-number {
+        font-size: 16pt;
+        color: black !important;
+    }
+
+    .stat-label {
+        font-size: 9pt;
+        color: #666 !important;
+    }
+
+    /* Content cards */
+    .content-card {
+        background: white !important;
+        border: 1px solid #ddd !important;
+        border-radius: 0;
+        padding: 15px;
+        margin-bottom: 20px;
+        page-break-inside: avoid;
+    }
+
+    .card-header {
+        border-bottom: 2px solid #333 !important;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+    }
+
+    .card-title {
+        font-size: 14pt;
+        color: black !important;
+    }
+
+    /* Tables */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 9pt;
+        page-break-inside: auto;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+
+    th {
+        background: #f0f0f0 !important;
+        color: black !important;
+        border: 1px solid #999 !important;
+        padding: 8px 6px;
+        font-weight: bold;
+        text-align: left;
+    }
+
+    td {
+        border: 1px solid #ddd !important;
+        padding: 6px;
+        color: black !important;
+    }
+
+    /* Badges */
+    .badge {
+        border: 1px solid #999 !important;
+        background: white !important;
+        color: black !important;
+        padding: 2px 6px;
+        font-size: 8pt;
+    }
+
+    /* Charts - hide in basic print, show static image if available */
+    .chart-container {
+        display: none;
+        /* Alternatively, if you want to include charts:
+        height: 250px;
+        page-break-inside: avoid;
+        */
+    }
+
+    /* Alternative: Show chart message */
+    .chart-container::after {
+        content: "[Chart: Lihat versi digital untuk visualisasi grafik]";
+        display: block;
+        padding: 20px;
+        text-align: center;
+        background: #f9f9f9;
+        border: 1px dashed #999;
+        color: #666;
+        font-style: italic;
+    }
+
+    /* Progress bars - convert to text */
+    .progress-bar::after {
+        content: attr(data-value) "%" !important;
+    }
+
+    /* Links - show URL in print */
+    a[href]::after {
+        content: " (" attr(href) ")";
+        font-size: 8pt;
+        color: #666;
+    }
+
+    /* Remove link styling */
+    a {
+        text-decoration: none;
+        color: black;
+    }
+
+    /* Headers and footers for each page */
+    @page {
+        @top-right {
+            content: "Halaman " counter(page) " dari " counter(pages);
+        }
+        @bottom-left {
+            content: "Lab Management System - Laporan";
+        }
+        @bottom-right {
+            content: "Dicetak: " date();
+        }
+    }
+
+    /* Prevent orphans and widows */
+    p, h2, h3, li {
+        orphans: 3;
+        widows: 3;
+    }
+
+    /* Keep headings with content */
+    h2, h3 {
+        page-break-after: avoid;
+    }
+
+    /* Add print timestamp */
+    .main::before {
+        content: "Dicetak pada: " attr(data-print-date);
+        display: block;
+        text-align: right;
+        font-size: 9pt;
+        color: #666;
+        margin-bottom: 10px;
+    }
+
+    /* Summary footer */
+    .main::after {
+        content: "© 2026 Lab Management System | Dokumen ini digenerate otomatis";
+        display: block;
+        text-align: center;
+        font-size: 8pt;
+        color: #999;
+        margin-top: 30px;
+        padding-top: 10px;
+        border-top: 1px solid #ddd;
+    }
+
+    /* Hide unnecessary decorations */
+    *::before,
+    *::after {
+        background: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Optimize colors for B&W printing */
+    * {
+        -webkit-print-color-adjust: economy !important;
+        print-color-adjust: economy !important;
+    }
+
+    /* Force black text for readability */
+    body, p, td, th, li {
+        color: #000 !important;
+    }
+
+    /* Remove animations and transitions */
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/**
+ * Print-specific utility classes
+ * Add these classes in HTML to control print behavior
+ */
+.print-only {
+    display: none;
+}
+
+@media print {
+    .print-only {
+        display: block !important;
+    }
+    
+    .no-print {
+        display: none !important;
+    }
+    
+    .page-break-before {
+        page-break-before: always;
+    }
+    
+    .page-break-after {
+        page-break-after: always;
+    }
+    
+    .page-break-avoid {
+        page-break-inside: avoid;
+    }
+}
+
+/**
+ * Print optimization tips:
+ * 
+ * 1. Add class="no-print" to elements you don't want in print
+ * 2. Add class="print-only" for print-specific content
+ * 3. Add class="page-break-before" to start new page
+ * 4. Add class="page-break-avoid" to keep elements together
+ * 
+ * Example usage in reports/*.php:
+ * <div class="no-print">This won't appear in print</div>
+ * <div class="print-only">Print-specific info here</div>
+ * <div class="page-break-before">New page starts here</div>
+ */
