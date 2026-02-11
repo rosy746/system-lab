@@ -298,6 +298,24 @@ $app_name    = 'Sistem Manajemen Laboratorium';
    DESIGN TOKENS  —  matches index.php palette exactly
    ═══════════════════════════════════════════════════════════ */
 :root {
+  --lab-white: #ffffff;
+  --lab-bg: #f8f9fa;
+  --lab-border: #e5e7eb;
+  
+  --lab-primary: #2563eb;
+  --lab-primary-light: #eff6ff;
+  --lab-secondary: #06b6d4;
+  --lab-secondary-light: #ecfeff;
+  --lab-success: #10b981;
+  --lab-success-light: #f0fdf4;
+  --lab-warning: #f59e0b;
+  --lab-warning-light: #fffbeb;
+  --lab-purple: #8b5cf6;
+  --lab-purple-light: #f5f3ff;
+  
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --text-light: #9ca3af;
   --cream:       #faf8f5;
   --white:       #ffffff;
   --text-dark:   #1e1e2e;
@@ -386,12 +404,25 @@ body {
 
 /* Back link */
 .back-link {
-  display:inline-flex; align-items:center; gap:.4rem;
-  font-size:.82rem; color:var(--text-light);
-  text-decoration:none; font-weight:500;
-  transition: color .2s;
-}
-.back-link:hover { color:var(--blue); }
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--lab-bg);
+            border: 1px solid var(--lab-border);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: var(--lab-white);
+            border-color: var(--lab-primary);
+            color: var(--lab-primary);
+        }
 
 /* ═══════════════════════════════════════════════════════════
    PAGE SHELL
@@ -841,10 +872,17 @@ select[multiple] option:checked {
 <!-- ═══ TOP BAR ═══ -->
 <div class="topbar">
   <div class="topbar-left">
-    <div class="topbar-logo">🧪</div>
+    <div class="topbar-logo">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 3h6v7.5L21 21a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2l6-10.5V3z"/>
+        <circle cx="12" cy="17" r="1" fill="white"/>
+        <circle cx="9" cy="19" r="0.5" fill="white" opacity="0.6"/>
+        <circle cx="15" cy="19" r="0.5" fill="white" opacity="0.6"/>
+      </svg>
+    </div>
     <div class="topbar-text">
-      <h1>Lab Management</h1>
-      <span>Jadwal &amp; Booking Laboratorium</span>
+      <h1>Jadwal Lab</h1>
+      <span>Booking &amp; Manajemen Jadwal</span>
     </div>
   </div>
   <div class="topbar-right">
@@ -852,7 +890,12 @@ select[multiple] option:checked {
       <span class="sync-dot"></span>
       <span id="syncText">Tersinkronisasi</span>
     </span>
-    <a href="index.php" class="back-link"><i class="fas fa-arrow-left"></i> Beranda</a>
+    <a href="dashboard.php" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      Kembali ke Dashboard
+    </a>
   </div>
 </div>
 
